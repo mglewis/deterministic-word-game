@@ -12,7 +12,7 @@ object CommandInterpreter {
     availableLetters: Seq[Letter]
   ): Command = {
     if (input == pass) {
-      Pass
+      Pass(availableLetters)
     } else if (input.startsWith(swap)) {
       interpretSwap(input, availableLetters)
     } else {
@@ -29,7 +29,7 @@ object CommandInterpreter {
     val result = AvailableLetterValidation.validate(lettersToSwap, availableLetters)
 
     if (result.isValid) {
-      Swap(lettersToSwap)
+      Swap(lettersToSwap, result.unusedLetters)
     } else {
       val invalidLetters = result.invalidLetters.mkString(",")
       InvalidCommand(s"Swap failed as the following letter selections were invalid: $invalidLetters")

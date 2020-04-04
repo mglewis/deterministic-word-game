@@ -1,6 +1,6 @@
 package uk.co.mglewis
 
-import uk.co.mglewis.datamodel.{Letter, Pass, Player, TurnEndingAction}
+import uk.co.mglewis.datamodel.{Letter, Pass, Player, Swap, TurnEndingAction}
 
 case class GameState(
   activePlayer: Player,
@@ -11,29 +11,37 @@ case class GameState(
 
   def completeTurn(
     pointsScored: Int,
-    unusedLettersFromThisTurn: Seq[Letter],
     action: TurnEndingAction
   ): GameState = {
-    val newLettersRequired = Math.abs(unusedLettersFromThisTurn.length - 7)
-    val (newLettersForActivePlayer, leftoverLetters) = remainingLetters.splitAt(newLettersRequired)
+    val newLettersRequired = action.played.length
+    val (newLettersForActivePlayer, newRemainingLetters) = remainingLetters.splitAt(newLettersRequired)
+
+    val maybeSwappedLetters = action match {
+      case swap: Swap => swap.played
+      case _ => Seq.empty
+    }
 
     val updatedActivePlayer = Player(
       activePlayer.name,
       activePlayer.totalScore + pointsScored,
-      letters = unusedLettersFromThisTurn ++ newLettersForActivePlayer,
+      letters = action.unused ++ newLettersForActivePlayer,
       lastAction = action
     )
 
     GameState(
       activePlayer = opposingPlayer,
       opposingPlayer = updatedActivePlayer,
-      remainingLetters = leftoverLetters
+      remainingLetters = maybeSwappedLetters ++ newRemainingLetters
     )
   }
 
   def isGameComplete: Boolean = {
     val noLettersLeft = activePlayer.letters.isEmpty || opposingPlayer.letters.isEmpty
-    val bothPlayersPassed = activePlayer.lastAction == Pass && opposingPlayer.lastAction == Pass
+    val bothPlayersPassed = (activePlayer.lastAction, opposingPlayer.lastAction) match {
+      case (_: Pass, _: Pass) => true
+      case _ => false
+    }
+
     noLettersLeft || bothPlayersPassed
   }
 }

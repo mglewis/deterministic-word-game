@@ -72,21 +72,24 @@ object Main extends App {
       case invalidCommand: InvalidCommand =>
         println(invalidCommand.message)
         playTurn(state)
-      case Pass =>
-        state.completeTurn(
-          pointsScored = 0,
-          unusedLettersFromThisTurn = state.activePlayer.letters,
-          action = Pass
-        )
+      case pass: Pass =>
+        state.completeTurn(pointsScored = 0, action = pass)
       case swap: Swap =>
-        state.completeTurn(
-          pointsScored = 0,
-          unusedLettersFromThisTurn = state.activePlayer.letters,
-          action = swap
-        )
+        swapLetters(swap, state)
       case play: Play =>
         playWord(play, state)
     }
+  }
+
+  private def swapLetters(
+    swap: Swap,
+    state: GameState
+  ): GameState = {
+    state.completeTurn(
+      pointsScored = 0,
+      action = swap
+    )
+
   }
 
   private def playWord(
@@ -96,10 +99,10 @@ object Main extends App {
     if (dictionary.contains(play.word)) {
       val turnScore = calculateScore(play.played)
       println(s"Hurrah! ${play.word} is a valid word! You scored $turnScore!")
-      state.completeTurn(turnScore, play.unused, action = play)
+      state.completeTurn(turnScore, action = play)
     } else {
       println(s"Oh no! ${play.word} wasn't found in the dictionary. You scored 0")
-      state.completeTurn(pointsScored = 0, state.activePlayer.letters, action = play)
+      state.completeTurn(pointsScored = 0, action = play)
     }
   }
 

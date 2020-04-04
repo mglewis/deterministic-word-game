@@ -13,7 +13,7 @@ object Player {
       name = name,
       totalScore = 0,
       letters = letters,
-      lastAction = Pass
+      lastAction = Pass(Seq.empty)
     )
 }
 
