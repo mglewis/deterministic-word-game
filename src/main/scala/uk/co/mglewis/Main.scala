@@ -3,13 +3,13 @@ package uk.co.mglewis
 import uk.co.mglewis.datamodel.{Command, InvalidCommand, Letter, Pass, Play, Player, Swap}
 import uk.co.mglewis.validation.CommandInterpreter
 
-import scala.io.Source
+import scala.io.{BufferedSource, Source}
 import scala.util.Random
 import scala.io.StdIn.readLine
 
 object Main extends App {
 
-  val file = Source.fromFile("resources/word_list.txt")
+  val file: BufferedSource = Source.fromFile("resources/word_list.txt")
   val reader = file.bufferedReader
   val dictionary = Stream.continually(reader.readLine()).takeWhile(_ != null).toSet
   reader.close()
@@ -24,7 +24,7 @@ object Main extends App {
     GameState(
       activePlayer = Player.create("Matt", gameLetters.slice(0, Letter.maxLetters)),
       opposingPlayer = Player.create("Katie", gameLetters.slice(Letter.maxLetters, Letter.maxLetters * 2)),
-      remainingLetters = gameLetters.slice(14, gameLetters.length - Letter.maxLetters * 2)
+      remainingLetters = gameLetters.drop(Letter.maxLetters * 2)
     )
   }
 
@@ -38,7 +38,7 @@ object Main extends App {
   def playTurn(state: GameState): GameState = {
     printSummary(state)
 
-    val playerInput = readLine().toUpperCase
+    val playerInput = readLine().toUpperCase.trim
 
     val userCommand = CommandInterpreter.interpret(
       input = playerInput,

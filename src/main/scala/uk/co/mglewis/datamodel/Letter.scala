@@ -12,7 +12,8 @@ case class Letter(
 }
 
 object Letter {
-  val startingLetters = Seq(
+
+  val startingLetters: Seq[Letter] = Seq(
     Letter('A', 1).copy(9),
     Letter('B', 3).copy(2),
     Letter('C', 3).copy(2),
@@ -41,11 +42,11 @@ object Letter {
     Letter('Z', 10).copy(1),
   ).flatten
 
-  val distinctLetters = startingLetters.toSet
+  val distinctLetters: Set[Letter] = startingLetters.toSet
 
-  val validCharacters = distinctLetters.map(_.char)
+  val validCharacters: Set[Char] = distinctLetters.map(_.char)
 
-  val maxLetters = 7
+  val maxLetters: Int = 7
 
   def fromString(string: String): Seq[Letter] = string.map(toLetter)
 
