@@ -45,6 +45,8 @@ object Letter {
 
   val validCharacters = distinctLetters.map(_.char)
 
+  val maxLetters = 7
+
   def fromString(string: String): Seq[Letter] = string.map(toLetter)
 
   private def toLetter(char: Char): Letter = {

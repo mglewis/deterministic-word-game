@@ -21,11 +21,10 @@ object Main extends App {
   def generateStartState: GameState = {
     val gameLetters = Random.shuffle(Letter.startingLetters)
 
-
     GameState(
-      activePlayer = Player.create("Matt", gameLetters.slice(0, 7)),
-      opposingPlayer = Player.create("Katie", gameLetters.slice(0, 14)),
-      remainingLetters = gameLetters.slice(14, gameLetters.length - 14)
+      activePlayer = Player.create("Matt", gameLetters.slice(0, Letter.maxLetters)),
+      opposingPlayer = Player.create("Katie", gameLetters.slice(Letter.maxLetters, Letter.maxLetters * 2)),
+      remainingLetters = gameLetters.slice(14, gameLetters.length - Letter.maxLetters * 2)
     )
   }
 
@@ -75,21 +74,10 @@ object Main extends App {
       case pass: Pass =>
         state.completeTurn(pointsScored = 0, action = pass)
       case swap: Swap =>
-        swapLetters(swap, state)
+        state.completeTurn(pointsScored = 0, action = swap)
       case play: Play =>
         playWord(play, state)
     }
-  }
-
-  private def swapLetters(
-    swap: Swap,
-    state: GameState
-  ): GameState = {
-    state.completeTurn(
-      pointsScored = 0,
-      action = swap
-    )
-
   }
 
   private def playWord(
