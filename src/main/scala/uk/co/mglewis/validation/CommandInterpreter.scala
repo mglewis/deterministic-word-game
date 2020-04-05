@@ -11,12 +11,14 @@ object CommandInterpreter {
     input: String,
     availableLetters: Seq[Letter]
   ): Command = {
-    if (input == pass) {
+    val cleanedInput = input.toUpperCase.trim
+
+    if (cleanedInput == pass) {
       Pass(availableLetters)
-    } else if (input.startsWith(swap)) {
-      interpretSwap(input, availableLetters)
+    } else if (cleanedInput.startsWith(swap)) {
+      interpretSwap(cleanedInput, availableLetters)
     } else {
-      interpretPlay(input, availableLetters)
+      interpretPlay(cleanedInput, availableLetters)
     }
   }
 

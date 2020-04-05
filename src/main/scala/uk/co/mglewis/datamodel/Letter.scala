@@ -48,7 +48,7 @@ object Letter {
 
   val maxLetters: Int = 7
 
-  def fromString(string: String): Seq[Letter] = string.map(toLetter)
+  def fromString(string: String): Seq[Letter] = string.toUpperCase.map(toLetter)
 
   private def toLetter(char: Char): Letter = {
     distinctLetters.find(_.char == char)
