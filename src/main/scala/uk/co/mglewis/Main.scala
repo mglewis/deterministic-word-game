@@ -22,14 +22,7 @@ object Main extends App {
       remainingLetters = gameLetters.drop(Letter.maxLetters * 2)
     )
   }
-
-  /**
-    * Wishlist:
-    * - Make swap actually swap tiles
-    * - Support for wildcards
-    * - Break out dictionary into separate class
-    * - Turn into a webserver with a restful api
-    */
+  
   def playTurn(state: GameState): GameState = {
     printSummary(state)
 
