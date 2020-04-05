@@ -40,6 +40,7 @@ object Letter {
     Letter('X', 8).copy(1),
     Letter('Y', 4).copy(2),
     Letter('Z', 10).copy(1),
+    Letter('?', 0).copy(2)
   ).flatten
 
   val distinctLetters: Set[Letter] = startingLetters.toSet

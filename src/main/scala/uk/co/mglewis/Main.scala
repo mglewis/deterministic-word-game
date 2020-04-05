@@ -3,17 +3,12 @@ package uk.co.mglewis
 import uk.co.mglewis.datamodel.{Command, InvalidCommand, Letter, Pass, Play, Player, Swap}
 import uk.co.mglewis.validation.CommandInterpreter
 
-import scala.io.{BufferedSource, Source}
 import scala.util.Random
 import scala.io.StdIn.readLine
 
 object Main extends App {
 
-  val file: BufferedSource = Source.fromFile("resources/word_list.txt")
-  val reader = file.bufferedReader
-  val dictionary = Stream.continually(reader.readLine()).takeWhile(_ != null).toSet
-  reader.close()
-  file.close()
+  val dictionary = new Dictionary("resources/word_list.txt")
 
   val startingState = generateStartState
   playTurn(startingState)
