@@ -2,7 +2,8 @@ package uk.co.mglewis
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import uk.co.mglewis.datamodel.{Letter, Pass, Play, Player, Swap}
+import uk.co.mglewis.datamodel.Player.{Computer, Human}
+import uk.co.mglewis.datamodel.{Letter, Pass, Play, Player, Points, Swap}
 
 class GameStateTest extends AnyWordSpecLike with Matchers {
 
@@ -10,11 +11,13 @@ class GameStateTest extends AnyWordSpecLike with Matchers {
 
   val wallace = Player.create(
     name = "Wallace",
+    playerType = Human,
     letters = Letter.fromString("CHEESES")
   )
 
   val gromit = Player.create(
     name = "Gromit",
+    playerType = Computer,
     letters = Letter.fromString("WALKIES")
   )
 
@@ -57,7 +60,7 @@ class GameStateTest extends AnyWordSpecLike with Matchers {
       )
 
       val newState = state.completeTurn(
-        pointsScored = 10,
+        pointsScored = Points(10),
         action = Play(
           played = Letter.fromString("CHEESE"),
           unused = Letter.fromString("S")
@@ -78,7 +81,7 @@ class GameStateTest extends AnyWordSpecLike with Matchers {
       )
 
       val newState = state.completeTurn(
-        pointsScored = 0,
+        pointsScored = Points.zero,
         action = Swap(
           played = Letter.fromString("CHESS"),
           unused = Letter.fromString("EE")

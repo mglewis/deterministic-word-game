@@ -1,7 +1,8 @@
 package uk.co.mglewis
 
-import uk.co.mglewis.datamodel.{Command, InvalidCommand, Letter, Pass, Play, Player, Swap}
-import uk.co.mglewis.validation.CommandInterpreter
+import uk.co.mglewis.datamodel.Player.{Computer, Human}
+import uk.co.mglewis.datamodel.{Command, InvalidCommand, Letter, Pass, Play, Player, Points, Swap}
+import uk.co.mglewis.validation.{AvailableLetterValidation, CommandInterpreter}
 
 import scala.util.Random
 import scala.io.StdIn.readLine
@@ -9,31 +10,64 @@ import scala.io.StdIn.readLine
 object Main extends App {
 
   val dictionary = new Dictionary("resources/word_list.txt")
-
   val startingState = generateStartState
-  playTurn(startingState)
+  val finishingState = playTurn(startingState)
+  // TODO: handle finishingState
 
   def generateStartState: GameState = {
     val gameLetters = Random.shuffle(Letter.startingLetters)
+    val playerOneLetters = gameLetters.take(Letter.maxLetters)
+    val playerTwoLetters = gameLetters.diff(playerOneLetters).take(Letter.maxLetters)
+    val remainingLetters = gameLetters.diff(playerOneLetters ++ playerTwoLetters)
 
     GameState(
-      activePlayer = Player.create("Matt", gameLetters.slice(0, Letter.maxLetters)),
-      opposingPlayer = Player.create("Katie", gameLetters.slice(Letter.maxLetters, Letter.maxLetters * 2)),
-      remainingLetters = gameLetters.drop(Letter.maxLetters * 2)
+      activePlayer = Player.create("Matt", Computer, playerOneLetters),
+      opposingPlayer = Player.create("Katie", Computer, playerTwoLetters),
+      remainingLetters = remainingLetters
     )
   }
-  
+
+  def determineComputerPlay(availableLetters: Seq[Letter]): Command = {
+    val allPlayableWords = dictionary.dictionaryOrderedByPoints.filter { dictionaryWord =>
+      AvailableLetterValidation.validate(dictionaryWord.orderedLetters, availableLetters).isValid
+    }
+
+    allPlayableWords.headOption.map { w =>
+      Play(
+        played = w.word,
+        unused = availableLetters.diff(w.word)
+      )
+    }.getOrElse {
+      Pass(
+        unused = availableLetters
+      )
+    }
+  }
+
+  /**
+    * Computer Player Strategy
+    *
+    * # Things to maximise
+    * - the number of points from this turn
+    * - the maximum number of points that the opponent can score next turn
+    * - the number of points from next turn
+    * I guess this can be summarised by:
+    * find max of: currentTurnPoints + nextTurnPoints - maxOpponentTurnPoints
+    */
   def playTurn(state: GameState): GameState = {
-    printSummary(state)
+    val command = if (state.activePlayer.playerType == Human) {
+      printSummary(state)
+      val playerInput = readLine().toUpperCase.trim
 
-    val playerInput = readLine().toUpperCase.trim
+      CommandInterpreter.interpret(
+        input = playerInput,
+        availableLetters = state.activePlayer.letters
+      )
+    } else {
+      determineComputerPlay(state.activePlayer.letters)
+    }
 
-    val userCommand = CommandInterpreter.interpret(
-      input = playerInput,
-      availableLetters = state.activePlayer.letters
-    )
-
-    val newGameState = action(userCommand, state)
+    val newGameState = action(command, state)
 
     if (newGameState.isGameComplete) newGameState else playTurn(newGameState)
   }
@@ -60,31 +94,28 @@ object Main extends App {
         println(invalidCommand.message)
         playTurn(state)
       case pass: Pass =>
-        state.completeTurn(pointsScored = 0, action = pass)
+        state.completeTurn(pointsScored = Points.zero, action = pass)
       case swap: Swap =>
-        state.completeTurn(pointsScored = 0, action = swap)
+        state.completeTurn(pointsScored = Points.zero, action = swap)
       case play: Play =>
-        playWord(play, state)
+        playWord(state.activePlayer, play, state)
     }
   }
 
   private def playWord(
+    player: Player,
     play: Play,
     state: GameState
   ): GameState = {
     if (dictionary.contains(play.word)) {
-      val turnScore = calculateScore(play.played)
-      println(s"Hurrah! ${play.word} is a valid word! You scored $turnScore!")
+      val turnScore = Points.calculate(play.played)
+      val paddedWord = play.word.mkString.padTo(Letter.maxLetters, ' ')
+      println(s"Well done ${player.name}! \t $paddedWord scores you $turnScore points")
       state.completeTurn(turnScore, action = play)
     } else {
       println(s"Oh no! ${play.word} wasn't found in the dictionary. You scored 0")
-      state.completeTurn(pointsScored = 0, action = play)
+      state.completeTurn(pointsScored = Points.zero, action = play)
     }
-  }
-
-  private def calculateScore(word: Seq[Letter]): Int = {
-    val bonus = if (word.length == 7) 50 else 0
-    word.map(_.points).sum + bonus
   }
 }
 

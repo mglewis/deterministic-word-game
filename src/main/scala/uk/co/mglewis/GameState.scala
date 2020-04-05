@@ -1,16 +1,16 @@
 package uk.co.mglewis
 
-import uk.co.mglewis.datamodel.{Letter, Pass, Player, Swap, TurnEndingAction}
+import uk.co.mglewis.datamodel.{Letter, Pass, Player, Points, Swap, TurnEndingAction}
 
 case class GameState(
   activePlayer: Player,
   opposingPlayer: Player,
   remainingLetters: Seq[Letter]
 ) {
-  def upcomingLetters: Seq[Letter] = remainingLetters.take(7)
+  def upcomingLetters: Seq[Letter] = remainingLetters.take(Letter.maxLetters)
 
   def completeTurn(
-    pointsScored: Int,
+    pointsScored: Points,
     action: TurnEndingAction
   ): GameState = {
     val newLettersRequired = action.played.length
@@ -21,11 +21,10 @@ case class GameState(
       case _ => Seq.empty
     }
 
-    val updatedActivePlayer = Player(
-      activePlayer.name,
-      activePlayer.totalScore + pointsScored,
-      letters = action.unused ++ newLettersForActivePlayer,
-      lastAction = action
+    val updatedActivePlayer = activePlayer.endOfTurnUpdate(
+      pointsScored = pointsScored,
+      newLetters = newLettersForActivePlayer,
+      action = action
     )
 
     GameState(

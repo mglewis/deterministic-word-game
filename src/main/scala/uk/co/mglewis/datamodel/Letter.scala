@@ -3,10 +3,12 @@ package uk.co.mglewis.datamodel
 case class Letter(
   char: Char,
   points: Int,
-) {
+) extends Ordered[Letter] {
   private def copy(i: Int): Seq[Letter] = {
     (1 to i).map { _ => this }
   }
+
+  def compare(that: Letter): Int = char.compareTo(that.char)
 
   override def toString: String = s"$char[$points]"
 }
@@ -45,18 +47,18 @@ object Letter {
 
   val distinctLetters: Set[Letter] = startingLetters.toSet
 
-  val validCharacters: Set[Char] = distinctLetters.map(_.char)
-
   val maxLetters: Int = 7
 
+  private val validCharacters: Set[Char] = distinctLetters.map(_.char)
+
   def fromString(string: String): Seq[Letter] = string.toUpperCase.map(toLetter)
+
+  def validString(string: String): Boolean = string.map(validCharacters.contains).reduce(_ && _)
 
   private def toLetter(char: Char): Letter = {
     distinctLetters.find(_.char == char)
       .getOrElse(throw new RuntimeException(s"Character $char cannot be converted to a valid letter!"))
   }
-
-  def validString(string: String): Boolean = string.map(validCharacters.contains).reduce(_ && _)
 }
 
 
