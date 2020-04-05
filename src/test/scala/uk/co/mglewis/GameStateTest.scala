@@ -85,7 +85,7 @@ class GameStateTest extends AnyWordSpecLike with Matchers {
         )
       )
 
-      newState.remainingLetters should equal (Letter.fromString("CHESSA"))
+      newState.remainingLetters should equal (Letter.fromString("CHESSAA"))
       newState.activePlayer.name should equal (gromit.name)
       newState.opposingPlayer.name should equal (wallace.name)
       newState.opposingPlayer.letters should equal (Letter.fromString("EEAAAAA"))
