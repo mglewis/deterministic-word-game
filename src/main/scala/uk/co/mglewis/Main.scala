@@ -1,7 +1,7 @@
 package uk.co.mglewis
 
 import uk.co.mglewis.datamodel.Player.{Computer, Human}
-import uk.co.mglewis.datamodel.{Command, InvalidCommand, Letter, Pass, Play, Player, Points, Swap}
+import uk.co.mglewis.datamodel.{Command, InvalidCommand, Letter, Pass, Play, Player, Points, Swap, TurnEndingAction}
 import uk.co.mglewis.validation.{AvailableLetterValidation, CommandInterpreter}
 
 import scala.util.Random
@@ -27,25 +27,48 @@ object Main extends App {
     )
   }
 
-  def determineComputerPlay(availableLetters: Seq[Letter]): Command = {
-    val validWords = dictionary.dictionaryOrderedByPoints.flatMap { dictionaryWord =>
-      val validationResult = AvailableLetterValidation.validate(dictionaryWord.word, availableLetters)
-      if (validationResult.isValid) Some(validationResult) else None
+  case class ActionAndPoints(action: TurnEndingAction, points: Points)
+
+  def allPossiblePlays(
+    availableLetters: Seq[Letter]
+  ): Seq[ActionAndPoints] = {
+    dictionary.dictionaryOrderedByPoints.par.flatMap { entry =>
+      val validationResult = AvailableLetterValidation.validate(entry.word, availableLetters)
+      if (validationResult.isValid) {
+        val play = Play(played = validationResult.usedLetters, unused = validationResult.unusedLetters)
+        Some(ActionAndPoints(play, Points.calculate(validationResult.usedLetters)))
+      } else None
+    }.seq
+  }
+
+  def allPossibleSwaps(
+    availableLetters: Seq[Letter]
+  ): Seq[ActionAndPoints] = {
+    Seq.empty // TODO: implement me!
+  }
+
+  def determineComputerAction(gameState: GameState): TurnEndingAction = {
+    val availableLetters = gameState.activePlayer.letters
+
+    val allPossibleActions = allPossiblePlays(availableLetters) ++ allPossibleSwaps(availableLetters)
+
+    val allPossibleActionsWithOptimalFollowUpPlay = allPossibleActions.map { initialAction =>
+      val newAvailableLetters = GameState.dealLettersToPlayer(
+        initialAction.action,
+        gameState.remainingLetters
+      ).playerLetters
+
+      val maybeBestFollowUpAction = allPossiblePlays(newAvailableLetters).headOption
+      val followUpPoints = maybeBestFollowUpAction.map(_.points).getOrElse(Points.zero)
+
+      ActionAndPoints(initialAction.action, initialAction.points + followUpPoints)
     }
 
-    val command = validWords.headOption.map { w =>
-      Play(
-        played = w.usedLetters,
-        unused = w.unusedLetters
-      )
-    }.getOrElse {
-      Pass(
-        unused = availableLetters
-      )
-    }
+    val maybeOptimalAction = allPossibleActionsWithOptimalFollowUpPlay.sortBy(_.points).headOption
+    val action = maybeOptimalAction.map(_.action).getOrElse(Pass(availableLetters))
 
-    println(s"Computer decided to $command")
-    command
+    println(s"Computer decided to $action")
+    action
   }
 
   /**
@@ -68,7 +91,7 @@ object Main extends App {
         availableLetters = state.activePlayer.letters
       )
     } else {
-      determineComputerPlay(state.activePlayer.letters)
+      determineComputerAction(state)
     }
 
     val newGameState = action(command, state)

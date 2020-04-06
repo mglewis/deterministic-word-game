@@ -11,7 +11,7 @@ class Dictionary(
 
   private val dictionary: Set[String] = Dictionary.build(filePath)
 
-  val dictionaryOrderedByPoints: Seq[LettersAndPoints] = Dictionary.orderByPoints(dictionary)
+  val dictionaryOrderedByPoints: Seq[LettersAndPoints] = Dictionary.buildWithPoints(dictionary)
 
   def contains(word: String): Boolean = {
     val pattern = word.toUpperCase.replaceAll("\\?", "[A-Z]")
@@ -38,7 +38,7 @@ object Dictionary {
     dictionary
   }
 
-  private def orderByPoints(dictionary: Set[String]): Seq[LettersAndPoints] = {
+  private def buildWithPoints(dictionary: Set[String]): Seq[LettersAndPoints] = {
     dictionary.map { word =>
       val letters = Letter.fromString(word)
       val lettersInAlphabeticalOrder = letters.sorted

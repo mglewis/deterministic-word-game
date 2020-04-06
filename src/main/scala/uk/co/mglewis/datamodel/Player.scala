@@ -18,7 +18,7 @@ case class Player(
       name = name,
       playerType = playerType,
       totalScore = totalScore + pointsScored,
-      letters = action.unused ++ newLetters,
+      letters = newLetters,
       lastAction = action
     )
   }

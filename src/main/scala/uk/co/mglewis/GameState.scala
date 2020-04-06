@@ -13,8 +13,7 @@ case class GameState(
     pointsScored: Points,
     action: TurnEndingAction
   ): GameState = {
-    val newLettersRequired = action.played.length
-    val (newLettersForActivePlayer, newRemainingLetters) = remainingLetters.splitAt(newLettersRequired)
+    val letterAllocation = GameState.dealLettersToPlayer(action, remainingLetters)
 
     val maybeSwappedLetters = action match {
       case swap: Swap => swap.played
@@ -23,14 +22,14 @@ case class GameState(
 
     val updatedActivePlayer = activePlayer.endOfTurnUpdate(
       pointsScored = pointsScored,
-      newLetters = newLettersForActivePlayer,
+      newLetters = letterAllocation.playerLetters,
       action = action
     )
 
     GameState(
       activePlayer = opposingPlayer,
       opposingPlayer = updatedActivePlayer,
-      remainingLetters = maybeSwappedLetters ++ newRemainingLetters
+      remainingLetters = maybeSwappedLetters ++ letterAllocation.remainingLetters
     )
   }
 
@@ -42,5 +41,24 @@ case class GameState(
     }
 
     noLettersLeft || bothPlayersPassed
+  }
+}
+
+object GameState {
+  case class LetterAllocation(
+    playerLetters: Seq[Letter],
+    remainingLetters: Seq[Letter]
+  )
+
+  def dealLettersToPlayer(
+    action: TurnEndingAction,
+    remainingLetters: Seq[Letter]
+  ): LetterAllocation = {
+    val (newLettersForPlayer, newRemainingLetters) = remainingLetters.splitAt(action.played.length)
+
+    LetterAllocation(
+      playerLetters = action.unused ++ newLettersForPlayer,
+      remainingLetters = newRemainingLetters
+    )
   }
 }
