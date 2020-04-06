@@ -28,20 +28,24 @@ object Main extends App {
   }
 
   def determineComputerPlay(availableLetters: Seq[Letter]): Command = {
-    val allPlayableWords = dictionary.dictionaryOrderedByPoints.filter { dictionaryWord =>
-      AvailableLetterValidation.validate(dictionaryWord.orderedLetters, availableLetters).isValid
+    val validWords = dictionary.dictionaryOrderedByPoints.flatMap { dictionaryWord =>
+      val validationResult = AvailableLetterValidation.validate(dictionaryWord.word, availableLetters)
+      if (validationResult.isValid) Some(validationResult) else None
     }
 
-    allPlayableWords.headOption.map { w =>
+    val command = validWords.headOption.map { w =>
       Play(
-        played = w.word,
-        unused = availableLetters.diff(w.word)
+        played = w.usedLetters,
+        unused = w.unusedLetters
       )
     }.getOrElse {
       Pass(
         unused = availableLetters
       )
     }
+
+    println(s"Computer decided to $command")
+    command
   }
 
   /**
@@ -111,6 +115,8 @@ object Main extends App {
       val turnScore = Points.calculate(play.played)
       val paddedWord = play.word.mkString.padTo(Letter.maxLetters, ' ')
       println(s"Well done ${player.name}! \t $paddedWord scores you $turnScore points")
+//      println(s"You have the following letters ${player.letters.mkString(", ")}\n")
+
       state.completeTurn(turnScore, action = play)
     } else {
       println(s"Oh no! ${play.word} wasn't found in the dictionary. You scored 0")

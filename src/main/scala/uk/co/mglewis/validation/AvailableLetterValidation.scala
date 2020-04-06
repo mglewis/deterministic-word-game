@@ -14,8 +14,10 @@ object AvailableLetterValidation {
 
   def validate(
     usedLetters: Seq[Letter],
-    availableLetters: Seq[Letter],
+    availableLetters: Seq[Letter]
   ): ValidationResult = {
+    import Letter.blank
+
     val startingLetterValidation = ValidationResult(
       usedLetters = Seq.empty,
       unusedLetters = availableLetters,
@@ -27,6 +29,12 @@ object AvailableLetterValidation {
         ValidationResult(
           usedLetters = validationState.usedLetters :+ letter,
           unusedLetters = validationState.unusedLetters.diff(Seq(letter)),
+          invalidLetters = validationState.invalidLetters
+        )
+      } else if (validationState.unusedLetters.contains(blank)) {
+        ValidationResult(
+          usedLetters = validationState.usedLetters :+ Letter.blank,
+          unusedLetters = validationState.unusedLetters.diff(Seq(blank)),
           invalidLetters = validationState.invalidLetters
         )
       } else {

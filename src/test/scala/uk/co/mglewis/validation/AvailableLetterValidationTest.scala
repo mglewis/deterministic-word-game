@@ -15,6 +15,7 @@ class AvailableLetterValidationTest extends AnyWordSpecLike with Matchers {
         usedLetters = Letter.fromString("ABCDE"),
         availableLetters = availableLetters
       )
+      result.usedLetters should be(Letter.fromString("ABCDE"))
       result.unusedLetters should be(Letter.fromString("AA"))
       result.isValid should be(true)
       result.invalidLetters should be(Set.empty)
@@ -29,5 +30,28 @@ class AvailableLetterValidationTest extends AnyWordSpecLike with Matchers {
       result.invalidLetters should be(Letter.fromString("Z").toSet)
     }
 
+    "use any ? letters as a last resort" in {
+      val result = AvailableLetterValidation.validate(
+        usedLetters = Letter.fromString("AAAZBC"),
+        availableLetters = availableLetters.take(6) :+ Letter.blank
+      )
+      result.isValid should be(true)
+    }
+
+    "allow a sequence of used letters that contains blanks" in {
+      val result = AvailableLetterValidation.validate(
+        usedLetters = Letter.fromString("F?E?D"),
+        availableLetters = Letter.fromString("A?CD?EF")
+      )
+      result.isValid should be(true)
+    }
+
+    "fail validation if using blanks when none are available" in {
+      val result = AvailableLetterValidation.validate(
+        usedLetters = Letter.fromString("A?"),
+        availableLetters = availableLetters
+      )
+      result.isValid should be(false)
+    }
   }
 }

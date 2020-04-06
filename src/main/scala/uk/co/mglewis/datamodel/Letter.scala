@@ -5,6 +5,7 @@ case class Letter(
   points: Int,
 ) extends Ordered[Letter] {
   private def copy(i: Int): Seq[Letter] = {
+    require(i > 0, "Can only copy a positive number of letters")
     (1 to i).map { _ => this }
   }
 
@@ -14,6 +15,8 @@ case class Letter(
 }
 
 object Letter {
+
+  val blank = Letter('?', 0)
 
   val startingLetters: Seq[Letter] = Seq(
     Letter('A', 1).copy(9),
@@ -42,7 +45,7 @@ object Letter {
     Letter('X', 8).copy(1),
     Letter('Y', 4).copy(2),
     Letter('Z', 10).copy(1),
-    Letter('?', 0).copy(2)
+    blank.copy(2)
   ).flatten
 
   val distinctLetters: Set[Letter] = startingLetters.toSet
