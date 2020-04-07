@@ -18,7 +18,9 @@ object Points {
   val zero = Points(0)
 
   def calculate(letters: Seq[Letter]): Points = {
-    val bonus = if (letters.length == Letter.maxLetters) Points(50) else zero
+    val bonus = if (letters.length == Letter.maxLetters) Points(50)
+      else if (letters.length == Letter.maxLetters - 1) Points(20)
+      else zero
     Points(letters.map(_.points).sum) + bonus
   }
 }

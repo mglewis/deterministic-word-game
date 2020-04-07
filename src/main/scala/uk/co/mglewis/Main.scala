@@ -43,8 +43,21 @@ object Main extends App {
 
   def allPossibleSwaps(
     availableLetters: Seq[Letter]
-  ): Seq[ActionAndPoints] = {
-    Seq.empty // TODO: implement me!
+  ): Set[ActionAndPoints] = {
+    case class LetterWthIndex(letter: Letter, index: Int)
+
+    // we use LetterWithIndex to prevent duplicate letters being removed when we determine the subsets
+    val letterSet = availableLetters.zipWithIndex.map(LetterWthIndex.tupled).toSet
+    val letterSubsets = letterSet.subsets.filter(_.nonEmpty)
+
+    val allSwaps = for {
+      subset <- letterSubsets
+      played = subset.toSeq.map(_.letter)
+      unused = availableLetters.diff(played)
+      swap = Swap(played = played, unused = unused)
+    } yield ActionAndPoints(swap, Points(0))
+
+    allSwaps.toSet
   }
 
   def determineComputerAction(gameState: GameState): TurnEndingAction = {
@@ -52,14 +65,17 @@ object Main extends App {
 
     val allPossibleActions = allPossiblePlays(availableLetters) ++ allPossibleSwaps(availableLetters)
 
+    println(s"actions length ${allPossibleActions.length}")
+
+
     val allPossibleActionsWithOptimalFollowUpPlay = allPossibleActions.map { initialAction =>
       val newAvailableLetters = GameState.dealLettersToPlayer(
         initialAction.action,
         gameState.remainingLetters
       ).playerLetters
 
-      val maybeBestFollowUpAction = allPossiblePlays(newAvailableLetters).headOption
-      val followUpPoints = maybeBestFollowUpAction.map(_.points).getOrElse(Points.zero)
+      val maybeBestFollowUpPlay = allPossiblePlays(newAvailableLetters).headOption
+      val followUpPoints = maybeBestFollowUpPlay.map(_.points).getOrElse(Points.zero)
 
       ActionAndPoints(initialAction.action, initialAction.points + followUpPoints)
     }
@@ -67,7 +83,7 @@ object Main extends App {
     val maybeOptimalAction = allPossibleActionsWithOptimalFollowUpPlay.sortBy(_.points).headOption
     val action = maybeOptimalAction.map(_.action).getOrElse(Pass(availableLetters))
 
-    println(s"Computer decided to $action")
+    println(s"Computer decided to ${action.name} - ${action.played.map(_.char).mkString}")
     action
   }
 
