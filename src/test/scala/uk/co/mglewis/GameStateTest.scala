@@ -2,7 +2,7 @@ package uk.co.mglewis
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import uk.co.mglewis.datamodel.Player.{Computer, Human}
+import uk.co.mglewis.datamodel.Player.{ActionAndPoints, Computer, Human}
 import uk.co.mglewis.datamodel.{Letter, Pass, Play, Player, Points, Swap}
 
 class GameStateTest extends AnyWordSpecLike with Matchers {
@@ -45,9 +45,11 @@ class GameStateTest extends AnyWordSpecLike with Matchers {
     }
 
     "identify that the game is over if both players chose to pass their last move" in {
+      val pass = ActionAndPoints(Pass(Letter.fromString("CHEESES")), Points.zero)
+
       GameState(
-        activePlayer = wallace.copy(lastAction = Pass(Seq.empty)),
-        opposingPlayer = gromit.copy(lastAction = Pass(Seq.empty)),
+        activePlayer = wallace.copy(actions = Seq(pass)),
+        opposingPlayer = gromit.copy(actions = Seq(pass)),
         remainingLetters = remainingLetters
       ).isGameComplete should equal (true)
     }

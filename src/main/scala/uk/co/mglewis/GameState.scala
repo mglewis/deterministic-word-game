@@ -21,7 +21,7 @@ case class GameState(
     }
 
     val updatedActivePlayer = activePlayer.endOfTurnUpdate(
-      pointsScored = pointsScored,
+      points = pointsScored,
       newLetters = letterAllocation.playerLetters,
       action = action
     )
@@ -35,13 +35,11 @@ case class GameState(
 
   def isGameComplete: Boolean = {
     val noLettersLeft = activePlayer.letters.isEmpty || opposingPlayer.letters.isEmpty
-    val bothPlayersPassed = (activePlayer.lastAction, opposingPlayer.lastAction) match {
-      case (_: Pass, _: Pass) => true
-      case _ => false
-    }
-
+    val bothPlayersPassed = isPass(activePlayer.lastAction) && isPass(opposingPlayer.lastAction)
     noLettersLeft || bothPlayersPassed
   }
+
+  private def isPass(action: Option[TurnEndingAction]): Boolean = action.exists(_.isInstanceOf[Pass])
 }
 
 object GameState {

@@ -1,30 +1,34 @@
 package uk.co.mglewis.datamodel
 
-import uk.co.mglewis.datamodel.Player.PlayerType
+import uk.co.mglewis.datamodel.Player.{ActionAndPoints, PlayerType}
 
 case class Player(
   name: String,
   playerType: PlayerType,
-  totalScore: Points,
   letters: Seq[Letter],
-  lastAction: TurnEndingAction
+  actions: Seq[ActionAndPoints]
 ) {
+  def totalScore: Points = actions.foldLeft(Points.zero)(_ + _.points)
+
+  def lastAction: Option[TurnEndingAction] = actions.lastOption.map(_.action)
+
   def endOfTurnUpdate(
-    pointsScored: Points,
     newLetters: Seq[Letter],
+    points: Points,
     action: TurnEndingAction
   ): Player = {
     Player(
       name = name,
       playerType = playerType,
-      totalScore = totalScore + pointsScored,
       letters = newLetters,
-      lastAction = action
+      actions = actions :+ ActionAndPoints(action, points)
     )
   }
 }
 
 object Player {
+
+  case class ActionAndPoints(action: TurnEndingAction, points: Points)
 
   sealed trait PlayerType
   case object Human extends PlayerType
@@ -38,9 +42,8 @@ object Player {
     Player(
       name = name,
       playerType = playerType,
-      totalScore = Points.zero,
       letters = letters,
-      lastAction = Play(Seq.empty, Seq.empty)
+      actions = Seq.empty
     )
   }
 }

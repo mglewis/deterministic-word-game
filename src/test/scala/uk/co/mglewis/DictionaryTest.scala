@@ -18,7 +18,7 @@ class DictionaryTest extends AnyWordSpecLike with Matchers {
     }
 
     "identify the highest scoring word as SAUSAGE" in {
-      val topWord = dictionary.dictionaryOrderedByPoints.head.word
+      val topWord = dictionary.wordsOrderedByPoints.head.word
       topWord should be (Letter.fromString("SAUSAGE"))
     }
   }
