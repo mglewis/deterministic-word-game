@@ -2,7 +2,10 @@ package uk.co.mglewis.validation
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import uk.co.mglewis.Dictionary.Word
 import uk.co.mglewis.datamodel.Letter
+
+import scala.collection.parallel.immutable.ParSet
 
 class AvailableLetterValidationTest extends AnyWordSpecLike with Matchers {
 
@@ -52,6 +55,23 @@ class AvailableLetterValidationTest extends AnyWordSpecLike with Matchers {
         availableLetters = availableLetters
       )
       result.isValid should be(false)
+    }
+
+    "return the subset of all valid words" in {
+      val candidates = ParSet(
+        Letter.fromString("BAT"),
+        Letter.fromString("CAT"),
+        Letter.fromString("MAT")
+      ).map(Word)
+
+      val actual = AvailableLetterValidation.validSubset(candidates, Letter.fromString("BCA?")).map(_.usedLetters)
+
+      val expected = Set(
+        Letter.fromString("BA?"),
+        Letter.fromString("CA?")
+      )
+
+      actual should be (expected)
     }
   }
 }

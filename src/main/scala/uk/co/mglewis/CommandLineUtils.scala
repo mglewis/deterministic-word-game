@@ -43,8 +43,10 @@ object CommandLineUtils {
       if (activePlayer.totalScore >= opposingPlayer.totalScore) (activePlayer, opposingPlayer)
       else (opposingPlayer, activePlayer)
 
-    s"""
-       | ${winner.name} beat ${loser.name} ${winner.totalScore} to ${loser.totalScore}
+    val message = s"""
+       |${winner.name} beat ${loser.name} ${winner.totalScore} to ${loser.totalScore}
      """.stripMargin
+
+    println(message)
   }
 }

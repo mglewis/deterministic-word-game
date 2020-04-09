@@ -1,43 +1,45 @@
 package uk.co.mglewis
 
-import uk.co.mglewis.datamodel.{Letter, Points}
+import uk.co.mglewis.Dictionary.Word
+import uk.co.mglewis.datamodel.Letter
+import uk.co.mglewis.validation.AvailableLetterValidation
+import uk.co.mglewis.validation.AvailableLetterValidation.ValidationResult
 
+import scala.collection.parallel.immutable.ParSet
 import scala.io.Source
 
 class Dictionary(
   filePath: String
 ) {
-  case class LettersAndPoints(
-    word: Seq[Letter],
-    orderedLetters: Seq[Letter],
-    points: Points
-  )
-
-  private val words: Set[String] = build(filePath)
-
-  val wordsOrderedByPoints: Seq[LettersAndPoints] = buildWithPoints(words)
+  val words: ParSet[Word] = build(filePath)
 
   def contains(word: String): Boolean = {
     val pattern = word.toUpperCase.replaceAll("\\?", "[A-Z]")
-    words.exists(_.matches(pattern))
+    words.exists(_.toString.matches(pattern))
   }
 
-  private def build(filePath: String): Set[String] = {
+  def allValidWords(availableLetters: Seq[Letter]): Set[ValidationResult] = {
+    AvailableLetterValidation.validSubset(words, availableLetters)
+  }
+
+  private def build(filePath: String): ParSet[Word] = {
     val file = Source.fromFile(filePath)
     val reader = file.bufferedReader
-    val dictionary = Stream.continually(reader.readLine()).takeWhile(_ != null).toSet
+    val words = Stream.continually(reader.readLine()).takeWhile(_ != null).toSet
     reader.close()
     file.close()
 
-    dictionary
+    words.par.map { w =>
+      Word(Letter.fromString(w))
+    }
   }
+}
 
-  private def buildWithPoints(dictionary: Set[String]): Seq[LettersAndPoints] = {
-    dictionary.map { word =>
-      val letters = Letter.fromString(word)
-      val lettersInAlphabeticalOrder = letters.sorted
-      val points = Points.calculate(lettersInAlphabeticalOrder)
-      LettersAndPoints(letters, lettersInAlphabeticalOrder, points)
-    }.toSeq.sortBy(_.points)
+object Dictionary {
+  case class Word(
+    letters: Seq[Letter]
+  ) {
+    val toCharSeq: Seq[Char] = letters.map(_.char)
+    override val toString: String = toCharSeq.mkString
   }
 }

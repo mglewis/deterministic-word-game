@@ -2,7 +2,6 @@ package uk.co.mglewis
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import uk.co.mglewis.datamodel.Letter
 
 class DictionaryTest extends AnyWordSpecLike with Matchers {
 
@@ -15,11 +14,6 @@ class DictionaryTest extends AnyWordSpecLike with Matchers {
 
     "correctly identify some words are missing" in {
       dictionary.contains("CHIPS") should be(false)
-    }
-
-    "identify the highest scoring word as SAUSAGE" in {
-      val topWord = dictionary.wordsOrderedByPoints.head.word
-      topWord should be (Letter.fromString("SAUSAGE"))
     }
   }
 }
