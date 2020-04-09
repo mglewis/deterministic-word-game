@@ -15,11 +15,13 @@ case class Points(
 }
 
 object Points {
+  val bingo = Points(50)
+  val miniBingo = Points(20)
   val zero = Points(0)
 
   def calculate(letters: Seq[Letter]): Points = {
-    val bonus = if (letters.length == Letter.maxLetters) Points(50)
-      else if (letters.length == Letter.maxLetters - 1) Points(20)
+    val bonus = if (letters.length == Letter.maxLetters) bingo
+      else if (letters.length == Letter.maxLetters - 1) miniBingo
       else zero
     Points(letters.map(_.points).sum) + bonus
   }

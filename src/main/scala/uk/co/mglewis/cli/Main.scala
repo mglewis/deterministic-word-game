@@ -22,7 +22,7 @@ object Main extends App {
     val remainingLetters = gameLetters.diff(playerOneLetters ++ playerTwoLetters)
 
     GameState(
-      activePlayer = Player.create("Matty", Human, playerOneLetters),
+      activePlayer = Player.create("Matty", Computer, playerOneLetters),
       opposingPlayer = Player.create("Katie", Computer, playerTwoLetters),
       remainingLetters = remainingLetters
     )

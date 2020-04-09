@@ -1,6 +1,6 @@
 package uk.co.mglewis.validation
 
-import uk.co.mglewis.Dictionary.Word
+import uk.co.mglewis.core.Dictionary.Word
 import uk.co.mglewis.datamodel.Letter
 
 import scala.collection.mutable

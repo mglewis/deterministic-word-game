@@ -2,7 +2,7 @@ package uk.co.mglewis.validation
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import uk.co.mglewis.Dictionary.Word
+import uk.co.mglewis.core.Dictionary.Word
 import uk.co.mglewis.datamodel.Letter
 
 import scala.collection.parallel.immutable.ParSet

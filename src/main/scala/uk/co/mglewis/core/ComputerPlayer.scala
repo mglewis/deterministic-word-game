@@ -5,7 +5,7 @@ import uk.co.mglewis.datamodel.{Letter, Pass, Play, Points, Swap, TurnEndingActi
 
 object ComputerPlayer {
 
-  // Maximises currentTurnPoints + nextTurnPoints
+  // Maximises currentTurnPoints + nextTurnPoints unless a bingo is available this turn
   def chooseAction(
     playerLetters: Seq[Letter],
     remainingLetters: Seq[Letter],
@@ -14,7 +14,9 @@ object ComputerPlayer {
     val currentTurnActions =
       allRelevantPlays(playerLetters, dictionary) ++ allPossibleSwaps(playerLetters, remainingLetters.size)
 
-    val allPossibleActionsWithOptimalFollowUpPlay = currentTurnActions.map { initialAction =>
+    val filteredCurrentTurnActions = removeLowScoringActionsIfBingoAvailable(currentTurnActions)
+
+    val actionsWIthOptimalFollowUpPlay = filteredCurrentTurnActions.map { initialAction =>
       val newAvailableLetters = GameState.dealLettersToPlayer(
         initialAction.action,
         remainingLetters
@@ -26,7 +28,7 @@ object ComputerPlayer {
       ActionAndPoints(initialAction.action, initialAction.points + followUpPoints)
     }
 
-    val maybeOptimalAction = allPossibleActionsWithOptimalFollowUpPlay.toSeq.sortBy(_.points).headOption
+    val maybeOptimalAction = actionsWIthOptimalFollowUpPlay.toSeq.sortBy(_.points).headOption
     maybeOptimalAction.map(_.action).getOrElse(Pass(playerLetters))
   }
 
@@ -44,7 +46,6 @@ object ComputerPlayer {
     discardEquivalentPlays(plays)
   }
 
-  // It doesn't matter if we play [BAT] or [TAB] so we can eliminate one in the name of performance
   private def discardEquivalentPlays(
     plays: Set[ActionAndPoints]
   ): Set[ActionAndPoints] = {
@@ -76,4 +77,10 @@ object ComputerPlayer {
     swaps.toSet
   }
 
+  private def removeLowScoringActionsIfBingoAvailable(
+    potentialTurnActions: Set[ActionAndPoints]
+  ): Set[ActionAndPoints] = {
+    val bingos = potentialTurnActions.filter(_.points.value > Points.bingo.value)
+    if (bingos.nonEmpty) bingos else potentialTurnActions
+  }
 }
