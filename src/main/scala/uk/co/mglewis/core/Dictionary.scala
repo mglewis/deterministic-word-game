@@ -1,6 +1,6 @@
-package uk.co.mglewis
+package uk.co.mglewis.core
 
-import uk.co.mglewis.Dictionary.Word
+import uk.co.mglewis.core.Dictionary.Word
 import uk.co.mglewis.datamodel.Letter
 import uk.co.mglewis.validation.AvailableLetterValidation
 import uk.co.mglewis.validation.AvailableLetterValidation.ValidationResult

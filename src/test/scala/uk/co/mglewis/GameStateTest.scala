@@ -2,6 +2,7 @@ package uk.co.mglewis
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import uk.co.mglewis.core.GameState
 import uk.co.mglewis.datamodel.Player.{ActionAndPoints, Computer, Human}
 import uk.co.mglewis.datamodel.{Letter, Pass, Play, Player, Points, Swap}
 

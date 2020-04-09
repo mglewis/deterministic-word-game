@@ -1,5 +1,6 @@
-package uk.co.mglewis
+package uk.co.mglewis.cli
 
+import uk.co.mglewis.core.{ComputerPlayer, Dictionary, GameState}
 import uk.co.mglewis.datamodel.Player.{Computer, Human}
 import uk.co.mglewis.datamodel.{Command, InvalidCommand, Letter, Pass, Play, Player, Points, Swap}
 import uk.co.mglewis.validation.CommandInterpreter
@@ -21,7 +22,7 @@ object Main extends App {
     val remainingLetters = gameLetters.diff(playerOneLetters ++ playerTwoLetters)
 
     GameState(
-      activePlayer = Player.create("Matty", Computer, playerOneLetters),
+      activePlayer = Player.create("Matty", Human, playerOneLetters),
       opposingPlayer = Player.create("Katie", Computer, playerTwoLetters),
       remainingLetters = remainingLetters
     )
@@ -84,5 +85,3 @@ object Main extends App {
     }
   }
 }
-
-

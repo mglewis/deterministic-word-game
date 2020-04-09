@@ -1,8 +1,7 @@
-package uk.co.mglewis
+package uk.co.mglewis.core
 
 import uk.co.mglewis.datamodel.Player.ActionAndPoints
 import uk.co.mglewis.datamodel.{Letter, Pass, Play, Points, Swap, TurnEndingAction}
-import uk.co.mglewis.validation.AvailableLetterValidation
 
 object ComputerPlayer {
 

@@ -1,4 +1,4 @@
-package uk.co.mglewis
+package uk.co.mglewis.core
 
 import uk.co.mglewis.datamodel.{Letter, Pass, Player, Points, Swap, TurnEndingAction}
 

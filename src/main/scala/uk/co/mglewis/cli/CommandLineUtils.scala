@@ -1,5 +1,6 @@
-package uk.co.mglewis
+package uk.co.mglewis.cli
 
+import uk.co.mglewis.core.GameState
 import uk.co.mglewis.datamodel.{InvalidCommand, Letter, Player}
 
 import scala.io.StdIn.readLine
