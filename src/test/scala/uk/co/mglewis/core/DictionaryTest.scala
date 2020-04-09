@@ -1,8 +1,7 @@
-package uk.co.mglewis
+package uk.co.mglewis.core
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import uk.co.mglewis.core.Dictionary
 
 class DictionaryTest extends AnyWordSpecLike with Matchers {
 
