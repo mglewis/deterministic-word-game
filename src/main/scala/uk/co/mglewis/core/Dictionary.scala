@@ -11,7 +11,7 @@ import scala.io.Source
 class Dictionary(
   filePath: String
 ) {
-  val words: ParSet[Word] = build(filePath)
+  private val words: ParSet[Word] = build(filePath)
 
   def contains(word: String): Boolean = {
     val pattern = word.toUpperCase.replaceAll("\\?", "[A-Z]")
