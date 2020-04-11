@@ -9,3 +9,5 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.1.1" % "test"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % "test"
+
+mainClass in (Compile, run) := Some("uk.co.mglewis.server.ServerMain")
