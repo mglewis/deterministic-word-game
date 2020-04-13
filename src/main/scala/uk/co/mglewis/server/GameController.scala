@@ -17,4 +17,8 @@ class GameController(secretPath: String) extends Controller {
     "Secret found."
   }
 
+  post(s"/$secretPath/update") { request: Request =>
+    info(s"Message received $request")
+  }
+
 }
