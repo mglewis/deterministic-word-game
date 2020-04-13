@@ -18,7 +18,7 @@ class GameController(secretPath: String) extends Controller {
   }
 
   post(s"/$secretPath/update") { request: Request =>
-    info(s"Message received $request")
+    info(s"Message received $request body: ${request.contentString}")
   }
 
 }
