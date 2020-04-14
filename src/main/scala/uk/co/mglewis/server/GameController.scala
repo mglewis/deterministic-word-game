@@ -1,7 +1,7 @@
 package uk.co.mglewis.server
 
 import com.twitter.finagle.Http
-import com.twitter.finagle.http.{Method, Request, Version}
+import com.twitter.finagle.http.{Method, Request, Response, Status, Version}
 import com.twitter.finatra.http.Controller
 import com.twitter.util.Await
 import uk.co.mglewis.core.{Dictionary, GameState}
@@ -27,6 +27,7 @@ class GameController(
   }
 
   post(s"/$secretPath/update") { request: Request =>
+    info("Request received!")
     val message = MessageSerializer.deserialize(request.contentString)
     val user = message.from
 
@@ -49,5 +50,7 @@ class GameController(
     val x = httpClient(messageRequest)
 
     Await.result(x)
+
+    Response(Status.Ok)
   }
 }
