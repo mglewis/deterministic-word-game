@@ -2,32 +2,16 @@ package uk.co.mglewis.cli
 
 import uk.co.mglewis.core.{ComputerPlayer, Dictionary, GameState}
 import uk.co.mglewis.datamodel.Player.{Computer, Human}
-import uk.co.mglewis.datamodel.{Command, InvalidCommand, Letter, Pass, Play, Player, Points, Swap}
+import uk.co.mglewis.datamodel.{Command, InvalidCommand, Pass, Play, Player, Points, Swap}
 import uk.co.mglewis.validation.CommandInterpreter
-
-import scala.util.Random
 
 object Main extends App {
 
   private val dictionary = new Dictionary("resources/word_list.txt")
 
-  val startingState = generateStartState
+  val startingState = GameState.generateStartState("Matty", Human)
   val finishingState = playTurn(startingState)
   CommandLineUtils.printEndOfGameSummary(finishingState)
-
-  def generateStartState: GameState = {
-    val gameLetters = Random.shuffle(Letter.startingLetters)
-    val playerOneLetters = gameLetters.take(Letter.maxLetters)
-    val playerTwoLetters = gameLetters.diff(playerOneLetters).take(Letter.maxLetters)
-    val remainingLetters = gameLetters.diff(playerOneLetters ++ playerTwoLetters)
-
-    GameState(
-      activePlayer = Player.create("Matty", Computer, playerOneLetters),
-      opposingPlayer = Player.create("Katie", Computer, playerTwoLetters),
-      remainingLetters = remainingLetters
-    )
-  }
-
 
   def playTurn(
     state: GameState,

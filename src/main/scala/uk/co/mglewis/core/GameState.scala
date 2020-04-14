@@ -1,6 +1,9 @@
 package uk.co.mglewis.core
 
+import uk.co.mglewis.datamodel.Player.{Computer, Human, PlayerType}
 import uk.co.mglewis.datamodel.{Letter, Pass, Player, Points, Swap, TurnEndingAction}
+
+import scala.util.Random
 
 case class GameState(
   activePlayer: Player,
@@ -59,4 +62,21 @@ object GameState {
       remainingLetters = newRemainingLetters
     )
   }
+
+  def generateStartState(
+    playerName: String,
+    playerType: PlayerType
+  ): GameState = {
+    val gameLetters = Random.shuffle(Letter.startingLetters)
+    val playerOneLetters = gameLetters.take(Letter.maxLetters)
+    val playerTwoLetters = gameLetters.diff(playerOneLetters).take(Letter.maxLetters)
+    val remainingLetters = gameLetters.diff(playerOneLetters ++ playerTwoLetters)
+
+    GameState(
+      activePlayer = Player.create(playerName, playerType, playerOneLetters),
+      opposingPlayer = Player.create("Conan", Computer, playerTwoLetters),
+      remainingLetters = remainingLetters
+    )
+  }
+
 }
