@@ -12,7 +12,7 @@ class GameController(
   botApiKey: String
 ) extends Controller {
 
-  private val httpClient = Http.client.newService("api.telegram.org")
+  private val httpClient = Http.client.newService("api.telegram.org:443")
 
   private val dictionary = new Dictionary("resources/word_list.txt")
 
