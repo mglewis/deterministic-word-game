@@ -21,7 +21,7 @@ class Server extends HttpServer {
   val botApiKey = properties.getProperty("TELEGRAM_API_KEY")
 
   override protected def configureHttp(router: HttpRouter): Unit = {
-    router.add(new GameController(secretPath))
+    router.add(new GameController(secretPath, botApiKey))
   }
 
 
