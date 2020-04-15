@@ -38,8 +38,6 @@ object Main extends App {
     if (newGameState.isGameComplete) newGameState else playTurn(newGameState)
   }
 
-
-
   private def action(
     userCommand: Command,
     state: GameState

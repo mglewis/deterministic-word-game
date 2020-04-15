@@ -20,8 +20,10 @@ class Server extends HttpServer {
   val secretPath = properties.getProperty("TELEGRAM_SECRET_API_PATH")
   val botApiKey = properties.getProperty("TELEGRAM_API_KEY")
 
+  val apiClient = new TelegramApiClient(botApiKey)
+
   override protected def configureHttp(router: HttpRouter): Unit = {
-    router.add(new GameController(secretPath, botApiKey))
+    router.add(new GameController(secretPath, apiClient))
   }
 
 
