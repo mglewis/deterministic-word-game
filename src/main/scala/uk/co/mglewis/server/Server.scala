@@ -4,6 +4,7 @@ import java.util.Properties
 
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.routing.HttpRouter
+import uk.co.mglewis.core.Dictionary
 
 import scala.io.Source
 
@@ -21,10 +22,10 @@ class Server extends HttpServer {
   val botApiKey = properties.getProperty("TELEGRAM_API_KEY")
 
   val apiClient = new TelegramApiClient(botApiKey)
+  val dictionary = new Dictionary("resources/word_list.txt")
 
   override protected def configureHttp(router: HttpRouter): Unit = {
-    router.add(new GameController(secretPath, apiClient))
+    router.add(new GameController(secretPath, apiClient, dictionary))
   }
-
-
+  
 }

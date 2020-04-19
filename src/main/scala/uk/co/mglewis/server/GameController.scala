@@ -1,23 +1,35 @@
 package uk.co.mglewis.server
 
-import com.twitter.finagle.Http
-import com.twitter.finagle.http.{Method, Request, Response, Status, Version}
+import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finatra.http.Controller
-import com.twitter.util.Await
-import uk.co.mglewis.core.{Dictionary, GameState}
+import uk.co.mglewis.core.{ComputerPlayer, Dictionary, GameState}
+import uk.co.mglewis.datamodel.{InvalidCommand, Pass, Play, Player, Points, Swap, TurnEndingAction}
 import uk.co.mglewis.datamodel.Player.Human
+import uk.co.mglewis.server.TelegramMessages.{ComputerReplies, Instructions, PlayerReplies}
+import uk.co.mglewis.validation.CommandInterpreter
 
 class GameController(
   secretPath: String,
-  apiClient: TelegramApiClient
+  apiClient: TelegramApiClient,
+  dictionary: Dictionary
 ) extends Controller {
-
-  //private val dictionary = new Dictionary("resources/word_list.txt")
 
   private var gameStates = Map.empty[User, GameState]
 
+  private var hallOfFame = Set.empty[User]
+
   get("/ping") { request: Request =>
     "Pong"
+  }
+
+  get("/stats") { request: Request =>
+    s"""
+       |There are ${gameStates.size} games in progress
+       |
+       |Current active players are ${gameStates.keySet.map(_.name).mkString("\n")}
+       |
+       |The following players have reached the hall of fame ${hallOfFame.map(_.name).mkString("\n")}
+     """.stripMargin
   }
 
   get(s"/$secretPath/ping") { request: Request =>
@@ -25,48 +37,121 @@ class GameController(
   }
 
   post(s"/$secretPath/update") { request: Request =>
+    info(request.contentString)
+
     val message = MessageSerializer.deserialize(request.contentString)
     val user = message.from
 
-    val startCommandReceived = message.text.toUpperCase == "START"
-
     require(!user.isBot, "Messages from bots are not supported")
 
-    val reply = if (gameStates.get(user).isEmpty && !startCommandReceived) {
-      intro(user.firstName)
-    } else if (gameStates.get(user).isEmpty && startCommandReceived) {
-      val initialGameState = GameState.generateStartState(user.firstName, Human)
-      gameStates = gameStates + (user -> initialGameState)
-      gameStart(initialGameState)
-    } else {
-      "Oh no, I can't do that yet"
+    val maybeGameState = gameStates.get(user)
+
+    val replies = maybeGameState match {
+      case None if !isStartCommand(message.text) => Seq(Instructions.introduction(user.name))
+      case None if isStartCommand(message.text) => Seq(startNewGame(user))
+      case Some(state) => continueGame(message, state)
     }
 
-    val response = Await.result(apiClient.sendMessage(message.chat.id, reply))
-    info(response)
-    info(response.contentString)
-    Response(Status.Ok)
+    replies.foreach { reply =>
+      apiClient.sendMessage(message.chat.id, reply).map(_ => Response(Status.Ok))
+    }
   }
 
-  private def intro(userName: String): String =
-    s"Hi $userName\n\nDo you wish to challenge me? I am a tough opponent to beat.\n\nJust message me with the text START so battle may commence!"
+  private def isStartCommand(message: String): Boolean = message.toUpperCase == "START"
 
-  private def gameStart(gameState: GameState): String = {
-    val playerLetters = gameState.activePlayer.letters.mkString(",")
-    val conanLetters = gameState.opposingPlayer.letters.mkString(",")
-    val upcoming️Letters = gameState.remainingLetters.take(7)
+  private def startNewGame(user: User): String = {
+    val initialGameState = GameState.generateStartState(user.id, user.name, Human)
+    gameStates = gameStates + (user -> initialGameState)
+    Instructions.gameStart(initialGameState)
+  }
 
-    s"""
-       |So it begins. As a benevolent barbarian I will let you move first.
-       |
-       |You have been dealt the following letters: $playerLetters
-       |I have been dealt the following letters: $conanLetters
-       |
-       |The next 7 available letters are $upcoming️Letters
-       |
-       |If you want to swap your letters send me a message in the format "-SWAP ${playerLetters.take(3)}
-       |If you can't think of any words just type -PASS
-       """.stripMargin
+  private def continueGame(message: Message, state: GameState): Seq[String] = {
+    val command = CommandInterpreter.interpret(message.text, state.activePlayer.letters)
+
+    command match {
+      case _: InvalidCommand =>
+        Seq(PlayerReplies.helpfulMessage(state))
+      case pass: Pass =>
+        val stateAfterPlayerAction = state.completeTurn(pointsScored = Points.zero, action = pass)
+        val endOfPlayerTurnMessage = PlayerReplies.turnPassed(stateAfterPlayerAction)
+
+        val computerAction = ComputerPlayer.chooseAction(
+          playerLetters = state.activePlayer.letters,
+          remainingLetters = state.remainingLetters,
+          dictionary = dictionary
+        )
+        val stateAfterComputerAction = action(computerAction, stateAfterPlayerAction)
+        val endOfComputerTurnMessage = ComputerReplies.computerAction(stateAfterComputerAction)
+        val startOfNewPlayerTurnMessage = PlayerReplies.startOfTurn(state.activePlayer)
+
+        gameStates = gameStates + (message.from -> stateAfterComputerAction)
+        Seq(endOfPlayerTurnMessage, endOfComputerTurnMessage, startOfNewPlayerTurnMessage)
+      case swap: Swap =>
+        val stateAfterPlayerAction = state.completeTurn(pointsScored = Points.zero, action = swap)
+        val endOfPlayerTurnMessage = PlayerReplies.lettersSwapped(stateAfterPlayerAction.opposingPlayer, swap)
+
+        val computerAction = ComputerPlayer.chooseAction(
+          playerLetters = state.activePlayer.letters,
+          remainingLetters = state.remainingLetters,
+          dictionary = dictionary
+        )
+        val stateAfterComputerAction = action(computerAction, stateAfterPlayerAction)
+        val endOfComputerTurnMessage = ComputerReplies.computerAction(stateAfterComputerAction)
+        val startOfNewPlayerTurnMessage = PlayerReplies.startOfTurn(state.activePlayer)
+
+        gameStates = gameStates + (message.from -> stateAfterComputerAction)
+        Seq(endOfPlayerTurnMessage, endOfComputerTurnMessage, startOfNewPlayerTurnMessage)
+      case play: Play =>
+        val (stateAfterPlayerAction, endOfPlayerTurnMessage) = if (dictionary.contains(play.word)) {
+          val turnScore = Points.calculate(play.played)
+          val newState = state.completeTurn(turnScore, action = play)
+          (newState, PlayerReplies.validWord(play.word, turnScore))
+        } else {
+          val newState = state.completeTurn(pointsScored = Points.zero, action = play)
+          (newState, PlayerReplies.validWord(play.word, Points.zero))
+        }
+
+        val computerAction = ComputerPlayer.chooseAction(
+          playerLetters = stateAfterPlayerAction.activePlayer.letters,
+          remainingLetters = stateAfterPlayerAction.remainingLetters,
+          dictionary = dictionary
+        )
+        val stateAfterComputerAction = action(computerAction, stateAfterPlayerAction)
+
+        val endOfComputerTurnMessage = ComputerReplies.computerAction(stateAfterComputerAction)
+        val startOfNewPlayerTurnMessage = PlayerReplies.startOfTurn(stateAfterComputerAction.activePlayer)
+        gameStates = gameStates + (message.from -> stateAfterComputerAction)
+        Seq(endOfPlayerTurnMessage, endOfComputerTurnMessage, startOfNewPlayerTurnMessage)
+    }
+  }
+
+  // copied from CLI version, remove in cleanup
+  private def action(
+    action: TurnEndingAction,
+    state: GameState
+  ): GameState = {
+    action match {
+      case pass: Pass =>
+        state.completeTurn(pointsScored = Points.zero, action = pass)
+      case swap: Swap =>
+        state.completeTurn(pointsScored = Points.zero, action = swap)
+      case play: Play =>
+        playWord(state.activePlayer, play, state)
+    }
+  }
+
+  // copied from CLI version, remove in cleanup
+  private def playWord(
+    player: Player,
+    play: Play,
+    state: GameState
+  ): GameState = {
+    if (dictionary.contains(play.word)) {
+      val turnScore = Points.calculate(play.played)
+      state.completeTurn(turnScore, action = play)
+    } else {
+      state.completeTurn(pointsScored = Points.zero, action = play)
+    }
   }
 
 }

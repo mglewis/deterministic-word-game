@@ -4,11 +4,17 @@ import org.json4s.native.JsonMethods
 
 case class User(
   id: Int,
-  firstName: String,
-  lastName: String,
+  firstName: Option[String],
+  lastName: Option[String],
   isBot: Boolean
 ) {
-  val fullName: String = s"$firstName $lastName".trim
+  val name: String = {
+    (firstName, lastName) match {
+      case (Some(first), _) => first
+      case (None, Some(last)) => last
+      case (None, None) => s"User $id"
+    }
+  }
 }
 
 case class Message(

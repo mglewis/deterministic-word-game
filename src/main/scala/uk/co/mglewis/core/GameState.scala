@@ -64,6 +64,7 @@ object GameState {
   }
 
   def generateStartState(
+    playerId: Int,
     playerName: String,
     playerType: PlayerType
   ): GameState = {
