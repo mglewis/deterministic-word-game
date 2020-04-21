@@ -12,4 +12,6 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % "test"
 
 libraryDependencies += "org.json4s" %% "json4s-native" % "3.7.0-M2"
 
+libraryDependencies += "com.typesafe.akka" % "akka-actor_2.12" % "2.6.4"
+
 mainClass in (Compile, run) := Some("uk.co.mglewis.server.ServerMain")

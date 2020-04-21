@@ -10,7 +10,6 @@ object Main extends App {
   private val dictionary = new Dictionary("resources/word_list.txt")
 
   val startingState = GameState.generateStartState(
-    playerId = -1,
     playerName = "Matty",
     playerType = Human
   )

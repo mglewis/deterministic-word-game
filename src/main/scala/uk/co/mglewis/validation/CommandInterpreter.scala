@@ -31,7 +31,7 @@ object CommandInterpreter {
     val result = AvailableLetterValidation.validate(lettersToSwap, availableLetters)
 
     if (result.isValid) {
-      Swap(lettersToSwap, result.unusedLetters)
+      Swap(played = lettersToSwap, unused = result.unusedLetters)
     } else {
       val invalidLetters = result.invalidLetters.mkString(",")
       InvalidCommand(s"Swap failed as the following letter selections were invalid: $invalidLetters")

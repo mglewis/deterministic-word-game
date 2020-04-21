@@ -16,7 +16,7 @@ object ComputerPlayer {
 
     val filteredCurrentTurnActions = removeLowScoringActionsIfBingoAvailable(currentTurnActions)
 
-    val actionsWIthOptimalFollowUpPlay = filteredCurrentTurnActions.map { initialAction =>
+    val actionsWithOptimalFollowUpPlay = filteredCurrentTurnActions.map { initialAction =>
       val newAvailableLetters = GameState.dealLettersToPlayer(
         initialAction.action,
         remainingLetters
@@ -28,7 +28,7 @@ object ComputerPlayer {
       ActionAndPoints(initialAction.action, initialAction.points + followUpPoints)
     }
 
-    val maybeOptimalAction = actionsWIthOptimalFollowUpPlay.toSeq.sortBy(_.points).headOption
+    val maybeOptimalAction = actionsWithOptimalFollowUpPlay.toSeq.sortBy(_.points).headOption
     maybeOptimalAction.map(_.action).getOrElse(Pass(playerLetters))
   }
 

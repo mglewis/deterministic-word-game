@@ -1,6 +1,6 @@
 package uk.co.mglewis.core
 
-import uk.co.mglewis.datamodel.Player.{Computer, Human, PlayerType}
+import uk.co.mglewis.datamodel.Player.{Computer, PlayerType}
 import uk.co.mglewis.datamodel.{Letter, Pass, Player, Points, Swap, TurnEndingAction}
 
 import scala.util.Random
@@ -64,7 +64,6 @@ object GameState {
   }
 
   def generateStartState(
-    playerId: Int,
     playerName: String,
     playerType: PlayerType
   ): GameState = {

@@ -27,4 +27,14 @@ class TelegramApiClient(
     httpClient(Request(Method.Get, url))
   }
 
+  def sendAnimation(
+    chatId: Int,
+    gifUrl: String
+  ): Future[Response] = {
+    val encodedUrl = URLEncoder.encode(gifUrl, "UTF-8")
+    val url = s"https://api.telegram.org/bot$botApiKey/sendAnimation?chat_id=$chatId&animation=$encodedUrl"
+    info(s"target url: $url")
+    httpClient(Request(Method.Get, url))
+  }
+
 }
