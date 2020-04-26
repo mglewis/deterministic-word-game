@@ -4,7 +4,7 @@ import uk.co.mglewis.core.GameState
 import uk.co.mglewis.datamodel.Player.{Computer, Human}
 import uk.co.mglewis.datamodel.{Player, Points, Swap}
 
-object TelegramMessages {
+object Messages {
 
   object Gifs {
     val swingingSword = "https://thumbs.gfycat.com/EnormousGreenLabradorretriever-mobile.mp4"

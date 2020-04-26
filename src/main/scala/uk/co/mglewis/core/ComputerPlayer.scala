@@ -16,7 +16,7 @@ object ComputerPlayer {
 
     val filteredCurrentTurnActions = removeLowScoringActionsIfBingoAvailable(currentTurnActions)
 
-    val actionsWithOptimalFollowUpPlay: Set[ActionAndPoints] = filteredCurrentTurnActions.map { initialAction =>
+    val actionsWithOptimalFollowUpPlay = filteredCurrentTurnActions.map { initialAction =>
       val maybeOptimalFollowUpPlay = findOptimalFollowUpPlay(initialAction, remainingLetters, dictionary)
       val followUpPoints = maybeOptimalFollowUpPlay.map(_.points).getOrElse(Points.zero)
       ActionAndPoints(initialAction.action, initialAction.points + followUpPoints)

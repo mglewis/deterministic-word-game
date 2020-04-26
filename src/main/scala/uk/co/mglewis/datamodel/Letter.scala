@@ -56,6 +56,8 @@ object Letter {
 
   def fromString(string: String): Seq[Letter] = string.toUpperCase.map(toLetter)
 
+  def asString(letters: Seq[Letter]): String = letters.map(_.char).mkString
+
   def validString(string: String): Boolean = string.map(validCharacters.contains).reduce(_ && _)
 
   private def toLetter(char: Char): Letter = {

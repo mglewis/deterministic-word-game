@@ -5,7 +5,7 @@ import java.net.URLEncoder
 import com.twitter.finagle.Http
 import com.twitter.finagle.http.{Method, Request, Response}
 import com.twitter.inject.Logging
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 
 class TelegramApiClient(
   botApiKey: String
@@ -20,21 +20,19 @@ class TelegramApiClient(
   def sendMessage(
     chatId: Int,
     message: String
-  ): Future[Response] = {
+  ): Response = {
     val encodedMessage = URLEncoder.encode(message, "UTF-8")
     val url = s"https://api.telegram.org/bot$botApiKey/sendMessage?chat_id=$chatId&text=$encodedMessage"
-    info(s"target url: $url")
-    httpClient(Request(Method.Get, url))
+    Await.result(httpClient(Request(Method.Get, url)))
   }
 
   def sendAnimation(
     chatId: Int,
     gifUrl: String
-  ): Future[Response] = {
+  ): Response = {
     val encodedUrl = URLEncoder.encode(gifUrl, "UTF-8")
     val url = s"https://api.telegram.org/bot$botApiKey/sendAnimation?chat_id=$chatId&animation=$encodedUrl"
-    info(s"target url: $url")
-    httpClient(Request(Method.Get, url))
+    Await.result(httpClient(Request(Method.Get, url)))
   }
 
 }

@@ -12,20 +12,20 @@ object ServerMain extends Server
 
 class Server extends HttpServer {
 
-  val properties: Properties = {
+  private val properties = {
     val props = new Properties()
     props.load(Source.fromFile("resources/properties").bufferedReader)
     props
   }
 
-  val secretPath = properties.getProperty("TELEGRAM_SECRET_API_PATH")
-  val botApiKey = properties.getProperty("TELEGRAM_API_KEY")
+  private val secretPath: String = properties.getProperty("TELEGRAM_SECRET_API_PATH")
+  private val botApiKey = properties.getProperty("TELEGRAM_API_KEY")
 
-  val apiClient = new TelegramApiClient(botApiKey)
-  val dictionary = new Dictionary("resources/word_list.txt")
+  private val apiClient = new TelegramApiClient(botApiKey)
+  private val dictionary = new Dictionary("resources/word_list.txt")
 
   override protected def configureHttp(router: HttpRouter): Unit = {
     router.add(new GameController(secretPath, apiClient, dictionary))
   }
-  
+
 }

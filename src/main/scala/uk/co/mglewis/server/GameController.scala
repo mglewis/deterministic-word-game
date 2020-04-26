@@ -3,11 +3,8 @@ package uk.co.mglewis.server
 import akka.actor.{ActorRef, ActorSystem}
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-import uk.co.mglewis.core.{ComputerPlayer, Dictionary, GameState}
-import uk.co.mglewis.datamodel.{InvalidCommand, Pass, Play, Player, Points, Swap, TurnEndingAction}
+import uk.co.mglewis.core.Dictionary
 import uk.co.mglewis.server.GameActor.Messages.UserMessage
-import uk.co.mglewis.server.TelegramMessages.{ComputerReplies, PlayerReplies}
-import uk.co.mglewis.validation.CommandInterpreter
 
 class GameController(
   secretPath: String,
