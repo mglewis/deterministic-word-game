@@ -37,8 +37,8 @@ class MessageSerializerTest extends AnyWordSpecLike with Matchers {
       val message = MessageSerializer.deserialize(testString)
 
       message.messageId should be (8)
-      message.from.firstName should be ("Matt")
-      message.from.lastName should be ("Lewis")
+      message.from.firstName should be (Some("Matt"))
+      message.from.lastName should be (Some("Lewis"))
       message.text should be ("Word games are fun!")
     }
 

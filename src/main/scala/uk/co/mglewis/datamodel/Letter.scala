@@ -24,7 +24,7 @@ object Letter {
     Letter('C', 3).copy(2),
     Letter('D', 2).copy(4),
     Letter('E', 1).copy(12),
-    Letter('F', 2).copy(2),
+    Letter('F', 4).copy(2),
     Letter('G', 2).copy(3),
     Letter('H', 4).copy(2),
     Letter('I', 1).copy(9),
