@@ -16,15 +16,9 @@ object ComputerPlayer {
 
     val filteredCurrentTurnActions = removeLowScoringActionsIfBingoAvailable(currentTurnActions)
 
-    val actionsWithOptimalFollowUpPlay = filteredCurrentTurnActions.map { initialAction =>
-      val newAvailableLetters = GameState.dealLettersToPlayer(
-        initialAction.action,
-        remainingLetters
-      ).playerLetters
-
-      val maybeBestFollowUpPlay = allRelevantPlays(newAvailableLetters, dictionary).headOption
-      val followUpPoints = maybeBestFollowUpPlay.map(_.points).getOrElse(Points.zero)
-
+    val actionsWithOptimalFollowUpPlay: Set[ActionAndPoints] = filteredCurrentTurnActions.map { initialAction =>
+      val maybeOptimalFollowUpPlay = findOptimalFollowUpPlay(initialAction, remainingLetters, dictionary)
+      val followUpPoints = maybeOptimalFollowUpPlay.map(_.points).getOrElse(Points.zero)
       ActionAndPoints(initialAction.action, initialAction.points + followUpPoints)
     }
 
@@ -82,5 +76,19 @@ object ComputerPlayer {
   ): Set[ActionAndPoints] = {
     val bingos = potentialTurnActions.filter(_.points.value > Points.bingo.value)
     if (bingos.nonEmpty) bingos else potentialTurnActions
+  }
+
+  private def findOptimalFollowUpPlay(
+    initialAction: ActionAndPoints,
+    remainingLetters: Seq[Letter],
+    dictionary: Dictionary
+  ): Option[ActionAndPoints] = {
+    val newAvailableLetters = GameState.dealLettersToPlayer(
+      initialAction.action,
+      remainingLetters
+    ).playerLetters
+
+    val allPossibleFollowUpPlays = allRelevantPlays(newAvailableLetters, dictionary)
+    allPossibleFollowUpPlays.toSeq.sortBy(_.points).headOption
   }
 }

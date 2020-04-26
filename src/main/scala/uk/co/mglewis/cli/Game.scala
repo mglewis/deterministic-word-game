@@ -5,16 +5,9 @@ import uk.co.mglewis.datamodel.Player.{Computer, Human}
 import uk.co.mglewis.datamodel.{Command, InvalidCommand, Pass, Play, Player, Points, Swap}
 import uk.co.mglewis.validation.CommandInterpreter
 
-object Main extends App {
-
-  private val dictionary = new Dictionary("resources/word_list.txt")
-
-  val startingState = GameState.generateStartState(
-    playerName = "Matty",
-    playerType = Human
-  )
-  val finishingState = playTurn(startingState)
-  CommandLineUtils.printEndOfGameSummary(finishingState)
+class Game(
+  private val dictionary: Dictionary
+) {
 
   def playTurn(
     state: GameState,
@@ -69,4 +62,5 @@ object Main extends App {
       state.completeTurn(pointsScored = Points.zero, action = play)
     }
   }
+
 }
