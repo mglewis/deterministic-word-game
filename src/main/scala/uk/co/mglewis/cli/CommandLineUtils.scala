@@ -12,8 +12,8 @@ object CommandLineUtils {
     val summary =
       s"""
          |${activePlayer.name}: ${activePlayer.totalScore} pts
-         |Letters: ${activePlayer.letters.map(_.char).mkString}
-         |Upcoming: ${remainingLetters.take(Letter.maxLetters).map(_.char).mkString}
+         |Letters: ${Letter.asString(activePlayer.letters)}
+         |Upcoming: ${Letter.asString(remainingLetters).take(Letter.maxLetters)}
        """.stripMargin
 
     println(summary)

@@ -2,7 +2,7 @@ package uk.co.mglewis.server
 
 import uk.co.mglewis.core.GameState
 import uk.co.mglewis.datamodel.Player.{Computer, Human}
-import uk.co.mglewis.datamodel.{Player, Points, Swap}
+import uk.co.mglewis.datamodel.{Letter, Player, Points, Swap}
 
 object Messages {
 
@@ -21,9 +21,9 @@ object Messages {
       """.stripMargin
 
     def gameStart(state: GameState): String = {
-      val playerLetters = state.activePlayer.letters.map(_.char).mkString
-      val conanLetters = state.opposingPlayer.letters.map(_.char).mkString
-      val upcoming️Letters = state.remainingLetters.map(_.char).mkString.take(7)
+      val playerLetters = Letter.asString(state.activePlayer.letters)
+      val conanLetters = Letter.asString(state.opposingPlayer.letters)
+      val upcoming️Letters = Letter.asString(state.remainingLetters).take(7)
       val swapLetters = playerLetters.take(2) + playerLetters.takeRight(1)
 
       s"""
@@ -54,19 +54,19 @@ object Messages {
 
   object PlayerReplies {
     def startOfTurn(state: GameState): String = {
-      val upcoming️Letters = state.remainingLetters.map(_.char).mkString.take(7)
+      val upcoming️Letters = Letter.asString(state.remainingLetters).take(7)
 
       s"""
          |It is your move.
          |
-         |Your letters: ${state.activePlayer.letters.map(_.char).mkString}
+         |Your letters: ${Letter.asString(state.activePlayer.letters)}
          |
-         |The next ${upcoming️Letters.size} letters: $upcoming️Letters
+         |The next ${upcoming️Letters.length} letters: $upcoming️Letters
       """.stripMargin
     }
 
     def helpfulMessage(state: GameState): String = {
-      val playerLetters = state.activePlayer.letters.map(_.char).mkString
+      val playerLetters = Letter.asString(state.activePlayer.letters)
       val swapLetters = playerLetters.take(2) + playerLetters.takeRight(1)
 
       s"""
@@ -76,7 +76,7 @@ object Messages {
          |
          |Should you find that too difficult you can also swap some of your letters by typing '-SWAP $swapLetters'
          |
-         |If you are a coward you can also pass your turn with '-PASS'. And end the game with '-QUIT'
+         |If you are a coward you can also pass your turn with '-PASS'
       """.stripMargin
     }
 
@@ -92,9 +92,9 @@ object Messages {
 
     def lettersSwapped(player: Player, swap: Swap): String = {
       s"""
-         |You have chosen to swap ${swap.played.map(_.char).mkString}
+         |You have chosen to swap ${Letter.asString(swap.played)}
          |
-         |Your new set of letters is ${player.letters.map(_.char).mkString}
+         |Your new set of letters is ${Letter.asString(player.letters)}
       """.stripMargin
     }
 
@@ -126,10 +126,12 @@ object Messages {
       val lastAction = state.opposingPlayer.actions.lastOption.getOrElse(
         throw new RuntimeException("This method cannot be called unless the computer player has already made a move")
       )
-      val actionText =  s"${lastAction.action.name} ${lastAction.action.played.map(_.char).mkString}".trim
+      val actionText =  s"${lastAction.action.name} ${Letter.asString(lastAction.action.played)}".trim
 
       s"""
          |I have chosen to $actionText scoring me ${lastAction.points}
+         |
+         |My new letters are ${Letter.asString(state.opposingPlayer.letters)}
          |
          |${totalScoreSummary(state)}
       """.stripMargin
